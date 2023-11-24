@@ -168,6 +168,7 @@ public class GraphPoet {
         return Collections.unmodifiableList(corpusWords);
     }
 
+
     /**
      * Generate a poem.
      * 
@@ -210,3 +211,4 @@ public class GraphPoet {
         return affinityGraph.toString();
     }
 }
+
