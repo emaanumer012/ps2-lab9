@@ -21,7 +21,8 @@ import graph.Graph;
 /**
  * A graph-based poetry generator.
  * 
- * <p>GraphPoet is initialized with a corpus of text, which it uses to derive a
+ * <p>
+ * GraphPoet is initialized with a corpus of text, which it uses to derive a
  * word affinity graph.
  * Vertices in the graph are words. Words are defined as non-empty
  * case-insensitive strings of non-space non-newline characters. They are
@@ -29,15 +30,24 @@ import graph.Graph;
  * Edges in the graph count adjacencies: the number of times "w1" is followed by
  * "w2" in the corpus is the weight of the edge from w1 to w2.
  * 
- * <p>For example, given this corpus:
- * <pre>    Hello, HELLO, hello, goodbye!    </pre>
- * <p>the graph would contain two edges:
- * <ul><li> ("hello,") -> ("hello,")   with weight 2
- *     <li> ("hello,") -> ("goodbye!") with weight 1 </ul>
- * <p>where the vertices represent case-insensitive {@code "hello,"} and
+ * <p>
+ * For example, given this corpus:
+ * 
+ * <pre>
+ *     Hello, HELLO, hello, goodbye!
+ * </pre>
+ * <p>
+ * the graph would contain two edges:
+ * <ul>
+ * <li>("hello,") -> ("hello,") with weight 2
+ * <li>("hello,") -> ("goodbye!") with weight 1
+ * </ul>
+ * <p>
+ * where the vertices represent case-insensitive {@code "hello,"} and
  * {@code "goodbye!"}.
  * 
- * <p>Given an input string, GraphPoet generates a poem by attempting to
+ * <p>
+ * Given an input string, GraphPoet generates a poem by attempting to
  * insert a bridge word between every adjacent pair of words in the input.
  * The bridge word between input words "w1" and "w2" will be some "b" such that
  * w1 -> b -> w2 is a two-edge-long path with maximum-weight weight among all
@@ -47,14 +57,27 @@ import graph.Graph;
  * words are lower case. The whitespace between every word in the poem is a
  * single space.
  * 
- * <p>For example, given this corpus:
- * <pre>    This is a test of the Mugar Omni Theater sound system.    </pre>
- * <p>on this input:
- * <pre>    Test the system.    </pre>
- * <p>the output poem would be:
- * <pre>    Test of the system.    </pre>
+ * <p>
+ * For example, given this corpus:
  * 
- * <p>PS2 instructions: this is a required ADT class, and you MUST NOT weaken
+ * <pre>
+ *     This is a test of the Mugar Omni Theater sound system.
+ * </pre>
+ * <p>
+ * on this input:
+ * 
+ * <pre>
+ *     Test the system.
+ * </pre>
+ * <p>
+ * the output poem would be:
+ * 
+ * <pre>
+ *     Test of the system.
+ * </pre>
+ * 
+ * <p>
+ * PS2 instructions: this is a required ADT class, and you MUST NOT weaken
  * the required specifications. However, you MAY strengthen the specifications
  * and you MAY add additional methods.
  * You MUST use Graph in your rep, but otherwise the implementation of this
@@ -66,21 +89,21 @@ public class GraphPoet {
     private final Graph<String> affinityGraph;
     private final List<String> corpusWords;
     // Abstraction function:
-    //   represents a poetry generator that uses a corpus of text
-    //   to turn an input string into poetry.
+    // represents a poetry generator that uses a corpus of text
+    // to turn an input string into poetry.
     //
     // Representation invariant:
-    //   graph is a non-null Graph object with words as vertices
-    //   and number of adjacencies(weight) as edges.
+    // graph is a non-null Graph object with words as vertices
+    // and number of adjacencies(weight) as edges.
     //
     // Safety from rep exposure:
-    //   - All fields are private and final
-    //   - graph is a mutable type, no references to it are provided
-    //     for the client to mutate
-    //   - corpusWords is a mutable list, getCorpusWords() returns
-    //     a read-only view preventing the client from 
-    //     making any mutations
-    
+    // - All fields are private and final
+    // - graph is a mutable type, no references to it are provided
+    // for the client to mutate
+    // - corpusWords is a mutable list, getCorpusWords() returns
+    // a read-only view preventing the client from
+    // making any mutations
+
     /**
      * Create a new poet with the graph from corpus (as described above).
      * 
@@ -92,9 +115,11 @@ public class GraphPoet {
         affinityGraph = generateAffinityGraph(corpusWords);
         checkRep();
     }
+
     private void checkRep() {
         assert affinityGraph != null;
     }
+
     /** Returns a list of words in lowercase, separation done at whitespace */
     private List<String> extractWordsFromFile(File corpus) throws IOException {
         List<String> words = new ArrayList<>();
@@ -106,15 +131,16 @@ public class GraphPoet {
         assert words != Collections.EMPTY_LIST;
         return words;
     }
+
     /**
      * Generates a word affinity graph
      * 
      * @return a graph whose vertices are lowercase words
      *         and edges are the counts of adjacencies
      */
-    private Graph<String> generateAffinityGraph(List<String> words){
+    private Graph<String> generateAffinityGraph(List<String> words) {
         Graph<String> graph = Graph.empty();
-        
+
         for (int i = 0; i < words.size(); i++) {
             String source = words.get(i);
             graph.add(source);
@@ -127,11 +153,12 @@ public class GraphPoet {
         }
         return graph;
     }
-    /** 
+
+    /**
      * Returns the words in the affinity graph generated from the corpus
      * 
-     * Words are defined as non-empty case-insensitive strings of non-space 
-     * non-newline characters. They are delimited in the corpus by spaces, newlines, 
+     * Words are defined as non-empty case-insensitive strings of non-space
+     * non-newline characters. They are delimited in the corpus by spaces, newlines,
      * or the ends of the file.
      * 
      * @return list of words in the order they appear in the corpus. All words are
@@ -141,6 +168,7 @@ public class GraphPoet {
         return Collections.unmodifiableList(corpusWords);
     }
 
+
     /**
      * Generate a poem.
      * 
@@ -148,9 +176,39 @@ public class GraphPoet {
      * @return poem (as described above)
      */
     public String poem(String input) {
-        throw new RuntimeException("not implemented");
+        String[] inputWords = input.split("\\s");
+        StringBuilder poem = new StringBuilder(input);
+        int fromIndex = 0;
+
+        for (int i = 0; i < inputWords.length; i++) {
+            if (i + 1 >= inputWords.length) {
+                break;
+            }
+            Map<String, Integer> word1Targets = affinityGraph.targets(inputWords[i].toLowerCase());
+            Map<String, Integer> word2Sources = affinityGraph.sources(inputWords[i + 1].toLowerCase());
+            Set<String> probableBridges = word1Targets.keySet();
+
+            List<String> allBridges = probableBridges.stream()
+                    .filter(possibleBridge -> word2Sources.containsKey(possibleBridge))
+                    .collect(Collectors.toList());
+
+            if (!allBridges.isEmpty()) {
+                Random rand = new Random();
+                int n = rand.nextInt(allBridges.size());
+                String bridge = allBridges.get(n);
+                // get the index of word 2 from the poem
+                int insertAt = poem.indexOf(inputWords[i + 1], fromIndex);
+                // insert the bridge word before that word
+                poem.insert(insertAt, bridge + " ");
+            }
+        }
+        checkRep();
+        return poem.toString();
     }
-    
-    // TODO toString()
-    
+
+    @Override
+    public String toString() {
+        return affinityGraph.toString();
+    }
 }
+
